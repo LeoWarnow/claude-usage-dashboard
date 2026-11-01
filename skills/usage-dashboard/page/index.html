@@ -1,0 +1,646 @@
+<meta name="dash-one-writer">
+<style>
+  /* App shell: sticky bar with tabs, period and theme; one view at a time; cards on a 12-column grid. */
+  #dash-root { --dash-gutter: 0; }
+  .bx {
+    --bx-ink: var(--color-fg);
+    --bx-mute: var(--color-fg-muted);
+    --bx-rule: var(--color-border-line);
+    --bx-card: var(--color-panel);
+    --bx-ground: var(--color-bg);
+    --bx-wash: color-mix(in srgb, var(--color-fg) 4%, var(--color-panel));
+    --bx-hair: color-mix(in srgb, var(--color-fg) 9%, transparent);
+    --bx-soft: color-mix(in srgb, var(--color-fg) 6%, transparent);
+    --bx-up: var(--color-ok);
+    --bx-down: var(--color-bad);
+    --bx-serif: var(--font-anthropic-serif);
+    --bx-sans: var(--font-anthropic-sans);
+    --bx-r: 12px;
+    --bx-shadow: 0 1px 2px rgb(15 27 45 / .05), 0 10px 30px -18px rgb(15 27 45 / .28);
+    --bx-pad: clamp(16px, 2.2vw, 28px);
+    --bx-c0: #1B3A6B; --bx-c1: #0E7C7B; --bx-c2: #C08A1E; --bx-c3: #C2553D; --bx-c4: #6B5B95; --bx-c5: #4F86B8; --bx-c6: #7A8B3A; --bx-c7: #8A94A6;
+    --bx-h0: #E7EAEF; --bx-h1: #C3D0E4; --bx-h2: #8FA6CB; --bx-h3: #4E6A9A; --bx-h4: #1B3A6B;
+    --bx-t0: #5A6475; --bx-t1: #26344D; --bx-t2: #14213A; --bx-t3: #FFFFFF; --bx-t4: #FFFFFF;
+    background: var(--bx-ground); color: var(--bx-ink); font-family: var(--bx-sans);
+    min-height: 100vh;
+  }
+  .bx.is-auto-dark { --bx-c0: #86AEE8; --bx-c1: #3FC1BE; --bx-c2: #E6B04B; --bx-c3: #EB8A71; --bx-c4: #AA9AD9; --bx-c5: #8DBCE3; --bx-c6: #AEC25F; --bx-c7: #A3ADBE;
+    --bx-h0: #1A2232; --bx-h1: #213659; --bx-h2: #2F5590; --bx-h3: #5B8AD0; --bx-h4: #A9C7F2;
+    --bx-t0: #9AA4B4; --bx-t1: #D6E2F5; --bx-t2: #EEF3FB; --bx-t3: #0C121D; --bx-t4: #0C121D; }
+  .bx.is-light {
+    --color-bg: #F3F4F6; --color-panel: #FFFFFF; --color-fg: #0F1B2D; --color-fg-muted: #5A6475; --color-border-line: #D9DEE5;
+    --color-ok: #1F7A55; --color-warn: #A8650B; --color-bad: #B5392E;
+    --cds-chart-grid: rgb(15 27 45 / .08); --cds-chart-muted: #A7AFBC; --cds-surface-popover: #FFFFFF; --cds-border: #D9DEE5;
+    --cds-text-secondary: #5A6475; --cds-shadow-popover: 0 8px 24px #0000001f, 0 2px 6px #00000014; color-scheme: light;
+  }
+  .bx.is-dark {
+    --color-bg: #0C121D; --color-panel: #141B28; --color-fg: #E9EDF3; --color-fg-muted: #9AA4B4; --color-border-line: #29324A;
+    --color-ok: #5CC495; --color-warn: #E3A34A; --color-bad: #EE7A6C;
+    --cds-chart-grid: rgb(233 237 243 / .08); --cds-chart-muted: #5C6678; --cds-surface-popover: #1C2434; --cds-border: rgb(255 255 255 / .1);
+    --cds-text-secondary: rgb(255 255 255 / .62); --cds-shadow-popover: 0 8px 24px #00000066, 0 2px 6px #0004; color-scheme: dark;
+    --bx-shadow: 0 1px 0 rgb(255 255 255 / .03) inset, 0 12px 32px -20px rgb(0 0 0 / .9);
+    --bx-c0: #86AEE8; --bx-c1: #3FC1BE; --bx-c2: #E6B04B; --bx-c3: #EB8A71; --bx-c4: #AA9AD9; --bx-c5: #8DBCE3; --bx-c6: #AEC25F; --bx-c7: #A3ADBE;
+    --bx-h0: #1A2232; --bx-h1: #213659; --bx-h2: #2F5590; --bx-h3: #5B8AD0; --bx-h4: #A9C7F2;
+    --bx-t0: #9AA4B4; --bx-t1: #D6E2F5; --bx-t2: #EEF3FB; --bx-t3: #0C121D; --bx-t4: #0C121D;
+  }
+  .bx [hidden] { display: none !important; }
+  .bx-view, .bx-card, .bx-block, .bx-mix, .bx-insights, .bx-disc-body { grid-template-columns: minmax(0, 1fr); }
+  .bx :is(h1, h2, h3, h4, p) { margin: 0; }
+  .bx-take { font-family: var(--bx-serif); font-weight: 400; font-size: clamp(1.45rem, 2.3vw, 1.95rem); line-height: 1.28; letter-spacing: -.005em; max-width: 62ch; text-wrap: pretty; }
+  .bx .bx-take b { font-weight: 600; font-variant-numeric: tabular-nums lining-nums; }
+  .bx-ins-dot.is-good { background: var(--bx-up); } .bx-ins-dot.is-bad { background: var(--bx-down); } .bx-ins-dot.is-neutral { background: var(--bx-mute); opacity: .55; }
+  .bx-ins.is-bad .bx-ins-t { color: var(--bx-down); }
+  .bx-table-wrap { scrollbar-width: thin; }
+  .bx-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  .bx-back { font: inherit; font-size: 12.5px; color: var(--bx-mute); background: none; border: 0; padding: 0 0 6px; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; }
+  .bx-back:hover { color: var(--bx-ink); }
+  [data-focus]:focus { outline: none; }
+  [data-focus]:focus-visible { outline: 2px solid var(--bx-ink); outline-offset: 4px; }
+  .bx-table tr.is-picked td { background: color-mix(in srgb, var(--bx-c0) 10%, transparent); }
+  .bx-table tr.is-picked td:first-child { box-shadow: inset 3px 0 0 var(--bx-c0); }
+  .bx-table .is-nowrap { white-space: nowrap; }
+  .bx-mix-legend.is-four { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .bx-tabs { mask-image: linear-gradient(to right, #000 calc(100% - 28px), transparent); -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 28px), transparent); }
+  .bx-num { font-variant-numeric: tabular-nums lining-nums; }
+  .bx :is(button, select, [tabindex], summary):focus-visible { outline: 2px solid var(--bx-ink); outline-offset: 2px; }
+
+  /* App bar */
+  .bx-appbar { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20; background: color-mix(in srgb, var(--bx-ground) 86%, transparent); backdrop-filter: saturate(1.4) blur(14px); -webkit-backdrop-filter: saturate(1.4) blur(14px); border-bottom: 1px solid var(--bx-rule); }
+  .bx-bar-in { max-width: 1360px; margin-inline: auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+  .bx-bar-top { display: flex; align-items: center; gap: 12px 18px; flex-wrap: wrap; padding-block: 12px 8px; }
+  .bx-brand { display: flex; align-items: center; gap: 12px; min-width: 0; margin-right: auto; }
+  .bx-mark { width: 34px; height: 34px; flex: none; border-radius: 9px; background: var(--bx-ink); display: grid; place-items: center; }
+  .bx-mark svg { width: 100%; height: 100%; }
+  .bx-brand-t { display: grid; min-width: 0; }
+  .bx-brand-name { font-family: var(--bx-serif); font-size: 1.18rem; line-height: 1.15; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .bx-brand-sub { font-size: 11.5px; color: var(--bx-mute); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .bx-seg { display: inline-flex; padding: 3px; gap: 2px; border-radius: 10px; background: var(--bx-soft); }
+  .bx-seg button { font: inherit; font-size: 12.5px; font-weight: 500; padding: 6px 11px; border: 0; border-radius: 7px; background: transparent; color: var(--bx-mute); cursor: pointer; white-space: nowrap; display: inline-flex; align-items: center; gap: 6px; }
+  .bx-seg button:hover { color: var(--bx-ink); }
+  .bx-seg button[aria-pressed="true"] { background: var(--bx-card); color: var(--bx-ink); box-shadow: 0 1px 2px rgb(0 0 0 / .08), 0 0 0 1px var(--bx-hair); }
+  .bx-seg svg { width: 15px; height: 15px; stroke: currentColor; fill: none; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+  .bx-seg.is-icons button { padding: 6px 8px; }
+  .bx-tabs { display: flex; gap: 2px; overflow-x: auto; scrollbar-width: none; margin-bottom: -1px; }
+  .bx-tabs::-webkit-scrollbar { display: none; }
+  .bx-tab { font: inherit; font-size: 13px; font-weight: 500; padding: 10px 12px 11px; border: 0; border-bottom: 2px solid transparent; background: none; color: var(--bx-mute); cursor: pointer; white-space: nowrap; display: inline-flex; align-items: center; gap: 7px; }
+  .bx-tab svg { width: 15px; height: 15px; stroke: currentColor; fill: none; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; opacity: .85; }
+  .bx-tab:hover { color: var(--bx-ink); }
+  .bx-tab[aria-selected="true"] { color: var(--bx-ink); border-bottom-color: var(--bx-ink); }
+
+  /* Views */
+  .bx-main { max-width: 1360px; margin-inline: auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 26px 56px; }
+  .bx-view { display: grid; gap: 20px; }
+  .bx-vhead { display: flex; flex-wrap: wrap; align-items: end; justify-content: space-between; gap: 8px 24px; padding-bottom: 4px; }
+  .bx-vtitle { font-family: var(--bx-serif); font-weight: 400; font-size: clamp(1.7rem, 3vw, 2.35rem); line-height: 1.08; letter-spacing: -.01em; }
+  .bx-vsub { color: var(--bx-mute); font-size: 13.5px; line-height: 1.5; max-width: 70ch; margin-top: 6px; }
+  .bx-vmeta { font-size: 12.5px; color: var(--bx-mute); font-variant-numeric: tabular-nums; text-align: right; }
+  .bx-grid { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 20px; align-items: start; }
+  .bx-s12 { grid-column: span 12; } .bx-s8 { grid-column: span 8; } .bx-s7 { grid-column: span 7; } .bx-s6 { grid-column: span 6; } .bx-s5 { grid-column: span 5; } .bx-s4 { grid-column: span 4; }
+  .bx-grid.is-stretch { align-items: stretch; }
+
+  /* Cards */
+  .bx-card { background: var(--bx-card); border: 1px solid var(--bx-rule); border-radius: var(--bx-r); box-shadow: var(--bx-shadow); padding: var(--bx-pad); display: grid; gap: 16px; align-content: start; min-width: 0; position: relative; }
+  .bx-chead { display: flex; align-items: start; justify-content: space-between; gap: 12px; }
+  .bx-chead-t { display: grid; gap: 4px; min-width: 0; }
+  .bx-eyebrow { font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--bx-mute); font-weight: 600; }
+  .bx-ctitle { font-size: 15px; font-weight: 600; line-height: 1.35; text-wrap: balance; }
+  .bx .bx-ctitle b { font-weight: 700; font-variant-numeric: tabular-nums; }
+  .bx-csub { font-size: 12.5px; color: var(--bx-mute); line-height: 1.5; }
+  .bx-more { flex: none; font: inherit; font-size: 12px; font-weight: 500; color: var(--bx-mute); background: none; border: 1px solid var(--bx-rule); border-radius: 8px; padding: 5px 9px; cursor: pointer; white-space: nowrap; }
+  .bx-more:hover { color: var(--bx-ink); border-color: var(--bx-ink); }
+  .bx-note { font-size: 12px; color: var(--bx-mute); line-height: 1.55; }
+
+  /* KPI band */
+  .bx-kpis { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 20px; }
+  .bx-kpi { padding: 18px 18px 0; gap: 6px; grid-template-rows: auto auto auto 44px; overflow: hidden; cursor: pointer; transition: transform .2s, box-shadow .2s; }
+  .bx-kpi:hover { transform: translateY(-1px); }
+  .bx-kpi-l { font-size: 12.5px; color: var(--bx-mute); font-weight: 500; }
+  .bx .bx-kpi-v { font-family: var(--bx-serif); font-weight: 400; font-size: clamp(1.9rem, 2.6vw, 2.5rem); line-height: 1; letter-spacing: -.015em; font-variant-numeric: tabular-nums lining-nums; }
+  .bx-kpi-d { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--bx-mute); min-height: 22px; font-variant-numeric: tabular-nums; }
+  .bx-delta { display: inline-flex; align-items: center; padding: 2px 7px; border-radius: 999px; font-size: 11.5px; font-weight: 600; background: var(--bx-soft); color: var(--bx-mute); font-variant-numeric: tabular-nums; }
+  .bx-delta.is-up { color: var(--bx-up); background: color-mix(in srgb, var(--bx-up) 13%, transparent); }
+  .bx-delta.is-down { color: var(--bx-down); background: color-mix(in srgb, var(--bx-down) 13%, transparent); }
+  .bx-kpi .bx-spark { margin-inline: -18px; height: 44px; }
+  .bx-spark svg { display: block; overflow: visible; }
+
+  /* Insights */
+  .bx-insights { display: grid; gap: 2px; min-height: 12rem; }
+  .bx-ins { display: grid; grid-template-columns: 10px minmax(0, 1fr) auto; gap: 4px 12px; align-items: start; text-align: left; font: inherit; color: inherit; background: none; border: 0; border-top: 1px solid var(--bx-hair); padding: 12px 4px; cursor: pointer; border-radius: 6px; }
+  .bx-ins:first-child { border-top: 0; }
+  .bx-ins:hover { background: var(--bx-wash); }
+  .bx-ins-dot { width: 8px; height: 8px; border-radius: 50%; margin-top: 6px; }
+  .bx-ins-t { font-weight: 600; font-size: 14px; line-height: 1.35; }
+  .bx-ins-d { grid-column: 2; font-size: 12.5px; color: var(--bx-mute); line-height: 1.45; }
+  .bx-ins-go { grid-row: 1 / span 2; grid-column: 3; color: var(--bx-mute); font-size: 16px; line-height: 1; padding-top: 2px; }
+
+  /* Charts */
+  .bx-chart { position: relative; min-height: 220px; }
+  .bx-chart svg { display: block; overflow: visible; }
+  .bx-chart text, .bx-spark text { font-family: var(--bx-sans); fill: var(--bx-mute); font-size: 11px; font-variant-numeric: tabular-nums; }
+  .bx-chart .bx-lab-strong { fill: var(--bx-ink); font-weight: 600; }
+  .bx-chart .bx-lab-serif { font-family: var(--bx-serif); fill: var(--bx-ink); font-size: 13px; }
+  .bx-chart .bx-lab-big { font-family: var(--bx-serif); fill: var(--bx-ink); font-size: 30px; }
+  .bx-chart text.on-strong { fill: var(--color-panel); }
+  .bx-chart text.on-strong.is-faint { fill-opacity: .8; }
+  .bx-scroll { overflow-x: auto; overflow-y: hidden; scrollbar-width: thin; }
+  .bx-cell { cursor: pointer; }
+  .bx-cell rect { stroke: transparent; stroke-width: 1.5px; }
+  .bx-cell:hover rect { stroke: var(--bx-ink); }
+  .bx-cell.is-sel rect { stroke: var(--bx-ink); stroke-width: 2.25px; }
+  .bx-tools { display: flex; flex-wrap: wrap; gap: 10px 14px; align-items: center; }
+  .bx-field { display: inline-flex; align-items: center; gap: 8px; font-size: 12.5px; color: var(--bx-mute); }
+  .bx-select { font: inherit; font-size: 12.5px; color: var(--bx-ink); background: var(--bx-card); border: 1px solid var(--bx-rule); border-radius: 8px; padding: 6px 8px; }
+  .bx-legend { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 16px; font-size: 12px; color: var(--bx-mute); min-height: 1.4em; }
+  .bx-legend-item { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
+  .bx-sw { display: inline-block; width: 10px; height: 10px; border-radius: 3px; flex: none; }
+  .bx-sw.is-line { height: 2px; width: 14px; border-radius: 1px; }
+  .bx-sw.is-hatch { background: repeating-linear-gradient(45deg, var(--bx-mute) 0 1px, transparent 1px 4px); }
+  .bx-tip { position: absolute; z-index: 30; pointer-events: none; min-width: 12rem; max-width: 19rem; background: var(--cds-surface-popover); border: 1px solid var(--cds-border); border-radius: 10px; box-shadow: var(--cds-shadow-popover); padding: 9px 11px; font-size: 12px; display: grid; gap: 4px; }
+  .bx-tip-h { color: var(--cds-text-secondary); }
+  .bx-tip-v { font-family: var(--bx-serif); font-size: 1.25rem; font-variant-numeric: tabular-nums; }
+  .bx-tip-t { font-weight: 600; line-height: 1.3; }
+  .bx-tip-r { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 6px; font-variant-numeric: tabular-nums; }
+  .bx-tip-f { color: var(--cds-text-secondary); border-top: 1px solid var(--cds-border); padding-top: 5px; margin-top: 2px; }
+
+  /* Bars, tables, stats */
+  .bx-bars { display: grid; gap: 10px; min-height: 2rem; }
+  .bx-bar { display: grid; grid-template-columns: minmax(0, 9.5rem) minmax(0, 1fr) minmax(4.2rem, auto); align-items: center; gap: 12px; font-size: 12.5px; }
+  .bx-bar.is-click { cursor: pointer; border-radius: 6px; }
+  .bx-bar.is-click:hover .bx-bar-name { text-decoration: underline; text-underline-offset: 3px; }
+  .bx-bar-name { display: inline-flex; align-items: center; gap: 8px; min-width: 0; color: var(--bx-ink); }
+  .bx-bar-name > span:last-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .bx-bar-track { height: 10px; background: var(--bx-soft); border-radius: 999px; overflow: hidden; display: flex; }
+  .bx-bar-fill { height: 100%; border-radius: 999px; }
+  .bx-bar-val { text-align: right; font-variant-numeric: tabular-nums; color: var(--bx-mute); white-space: nowrap; }
+  .bx-bar-sub { grid-column: 2 / -1; margin-top: -5px; font-size: 11.5px; color: var(--bx-mute); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .bx-stack { display: flex; height: 12px; border-radius: 999px; overflow: hidden; gap: 2px; }
+  .bx-stack > span { height: 100%; min-width: 3px; }
+  .bx-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 7.5rem), 1fr)); border: 1px solid var(--bx-rule); border-radius: 10px; overflow: hidden; background: var(--bx-card); }
+  .bx-stat { display: grid; gap: 2px; padding: 10px 12px; background: var(--bx-card); box-shadow: 0 0 0 .5px var(--bx-rule); }
+  .bx-stat-l { font-size: 11.5px; color: var(--bx-mute); }
+  .bx .bx-stat-v { font-family: var(--bx-serif); font-weight: 400; font-size: 1.3rem; font-variant-numeric: tabular-nums lining-nums; }
+  .bx-table-wrap { overflow: auto; max-height: 28rem; border: 1px solid var(--bx-rule); border-radius: 10px; }
+  .bx-table { width: 100%; border-collapse: collapse; font-size: 12.5px; font-variant-numeric: tabular-nums; }
+  .bx-table th { position: sticky; top: 0; z-index: 1; background: var(--bx-card); text-align: left; font-weight: 600; font-size: 11.5px; color: var(--bx-mute); padding: 10px 12px; border-bottom: 1px solid var(--bx-rule); white-space: nowrap; letter-spacing: .02em; }
+  .bx-table td { padding: 9px 12px; border-bottom: 1px solid var(--bx-hair); vertical-align: top; }
+  .bx-table tbody tr:last-child td { border-bottom: 0; }
+  .bx-table tbody tr:hover td { background: var(--bx-wash); }
+  .bx-table .is-num { text-align: right; }
+  .bx-table .is-title { min-width: 14rem; max-width: 32rem; color: var(--bx-ink); }
+  .bx-table .is-muted { color: var(--bx-mute); }
+  .bx-table .is-model { white-space: nowrap; }
+  .bx-table tr.is-click { cursor: pointer; }
+  .bx-disc { border: 1px solid var(--bx-rule); border-radius: 10px; background: var(--bx-card); }
+  .bx-disc > summary { list-style: none; cursor: pointer; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 14px; font-weight: 600; font-size: 13.5px; }
+  .bx-disc > summary::-webkit-details-marker { display: none; }
+  .bx-disc > summary::after { content: ""; width: 8px; height: 8px; border-right: 1.6px solid var(--bx-mute); border-bottom: 1.6px solid var(--bx-mute); transform: rotate(45deg); margin-right: 4px; transition: transform .2s; }
+  .bx-disc[open] > summary::after { transform: rotate(-135deg); }
+  .bx-disc > .bx-disc-body { padding: 0 14px 14px; display: grid; gap: 10px; }
+  .bx-disc .bx-table-wrap { border-radius: 8px; }
+  .bx-count { font-weight: 500; color: var(--bx-mute); font-variant-numeric: tabular-nums; }
+
+  /* Inspector */
+  .bx-insp { position: sticky; top: 118px; }
+  .bx-insp-title { font-family: var(--bx-serif); font-weight: 400; font-size: 1.55rem; line-height: 1.12; }
+  .bx-insp-sub { font-size: 12.5px; color: var(--bx-mute); font-variant-numeric: tabular-nums; line-height: 1.5; }
+  .bx-step { display: inline-flex; gap: 6px; }
+  .bx-step button { font: inherit; font-size: 15px; width: 32px; height: 30px; border: 1px solid var(--bx-rule); border-radius: 8px; background: var(--bx-card); color: var(--bx-ink); cursor: pointer; }
+  .bx-step button:hover { border-color: var(--bx-ink); }
+  .bx-h4 { font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--bx-mute); font-weight: 600; }
+  .bx-block { display: grid; gap: 10px; min-width: 0; }
+
+  /* Gauge and mix */
+  .bx-gauge { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 18px; align-items: center; min-height: 140px; }
+  .bx-gauge svg { width: 132px; height: 132px; display: block; }
+  .bx-gauge text { font-family: var(--bx-serif); fill: var(--bx-ink); }
+  .bx-figs { display: grid; gap: 12px; }
+  .bx-fig { display: grid; gap: 1px; }
+  .bx-fig-l { font-size: 11.5px; color: var(--bx-mute); }
+  .bx .bx-fig-v { font-family: var(--bx-serif); font-weight: 400; font-size: 1.45rem; font-variant-numeric: tabular-nums lining-nums; }
+  .bx-mix { display: grid; gap: 14px; min-height: 6rem; }
+  .bx-mix-bar { display: flex; height: 22px; gap: 2px; border-radius: 6px; overflow: hidden; }
+  .bx-mix-seg { height: 100%; min-width: 3px; }
+  .bx-mix-legend { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 9rem), 1fr)); gap: 12px; }
+  .bx-mix-item { display: grid; gap: 2px; font-size: 12px; color: var(--bx-mute); }
+  .bx .bx-mix-item b { font-family: var(--bx-serif); font-weight: 400; font-size: 1.25rem; color: var(--bx-ink); font-variant-numeric: tabular-nums; }
+
+  .bx-method { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 22rem), 1fr)); gap: 20px; }
+  .bx-method p { font-size: 13px; color: var(--bx-mute); line-height: 1.65; }
+  .bx .bx-method b { color: var(--bx-ink); font-weight: 600; }
+  .bx-code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: .95em; }
+  .bx-fail { margin: 0; min-height: inherit; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 12px; color: var(--bx-mute); }
+  .bx-fail-dot { width: .375rem; height: .375rem; border-radius: 50%; background: var(--color-bad); }
+  .bx [data-dash-source-state=empty] { color: transparent; }
+  .bx [data-dash-source-state=refreshing] { opacity: .5; transition: opacity var(--cds-dur-slow); }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .bx-view:not([hidden]) { animation: bx-in .35s var(--cds-ease-out) both; }
+    .bx-bar-fill, .bx-mix-seg { transition: width var(--cds-dur-slow) var(--cds-ease-out); }
+    @keyframes bx-in { from { opacity: .4; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+  }
+  @media (max-width: 1180px) {
+    .bx-kpis { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .bx-s8, .bx-s7, .bx-s6, .bx-s5, .bx-s4 { grid-column: span 12; }
+    .bx-grid.is-thirds > .bx-s4 { grid-column: span 6; }
+    .bx-insp { position: static; }
+  }
+  @media (max-width: 560px) { .bx-table .is-sec { display: none; } .bx-table .is-title { min-width: 0; } }
+  @media (max-width: 760px) {
+    .bx-grid, .bx-kpis { gap: 14px; }
+    .bx-kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .bx-grid.is-thirds > .bx-s4 { grid-column: span 12; }
+    .bx-brand-sub { display: none; }
+    .bx-bar-top { padding-block: 10px 6px; }
+    .bx-brand-name { font-size: 1.02rem; }
+    .bx-mix-legend.is-four { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .bx-vmeta { text-align: left; }
+    .bx-bar { grid-template-columns: minmax(0, 6.5rem) minmax(0, 1fr) auto; }
+    .bx-gauge { grid-template-columns: minmax(0, 1fr); justify-items: start; }
+  }
+</style>
+
+<div class="bx" id="review">
+  <header class="bx-appbar">
+    <div class="bx-bar-in">
+      <div class="bx-bar-top">
+        <div class="bx-brand">
+          <span class="bx-mark" aria-hidden="true"><svg viewBox="0 0 100 100"><circle cx="35.2" cy="20.4" r="0.91" fill="var(--bx-ground)"/><circle cx="42.6" cy="20.4" r="2.45" fill="var(--bx-ground)"/><circle cx="50" cy="20.4" r="2.95" fill="var(--bx-ground)"/><circle cx="57.4" cy="20.4" r="2.45" fill="var(--bx-ground)"/><circle cx="64.8" cy="20.4" r="0.91" fill="var(--bx-ground)"/><circle cx="27.8" cy="27.8" r="1.91" fill="var(--bx-ground)"/><circle cx="35.2" cy="27.8" r="3.69" fill="var(--bx-ground)"/><circle cx="42.6" cy="27.8" r="2.4" fill="var(--bx-ground)"/><circle cx="50" cy="27.8" r="1.67" fill="var(--bx-ground)"/><circle cx="57.4" cy="27.8" r="2.4" fill="var(--bx-ground)"/><circle cx="64.8" cy="27.8" r="3.69" fill="var(--bx-ground)"/><circle cx="72.2" cy="27.8" r="1.9" fill="var(--bx-ground)"/><circle cx="20.4" cy="35.2" r="0.91" fill="var(--bx-ground)"/><circle cx="27.8" cy="35.2" r="3.69" fill="var(--bx-ground)"/><circle cx="35.2" cy="35.2" r="0.92" fill="var(--bx-ground)"/><circle cx="64.8" cy="35.2" r="0.92" fill="var(--bx-ground)"/><circle cx="72.2" cy="35.2" r="1.13" fill="var(--bx-ground)"/><circle cx="20.4" cy="42.6" r="2.45" fill="var(--bx-ground)"/><circle cx="27.8" cy="42.6" r="2.4" fill="var(--bx-ground)"/><circle cx="20.4" cy="50" r="2.95" fill="var(--bx-ground)"/><circle cx="27.8" cy="50" r="1.67" fill="var(--bx-ground)"/><circle cx="20.4" cy="57.4" r="2.45" fill="var(--bx-ground)"/><circle cx="27.8" cy="57.4" r="2.4" fill="var(--bx-ground)"/><circle cx="20.4" cy="64.8" r="0.91" fill="var(--bx-ground)"/><circle cx="27.8" cy="64.8" r="3.69" fill="var(--bx-ground)"/><circle cx="35.2" cy="64.8" r="0.92" fill="var(--bx-ground)"/><circle cx="64.8" cy="64.8" r="0.92" fill="var(--bx-ground)"/><circle cx="72.2" cy="64.8" r="1.13" fill="var(--bx-ground)"/><circle cx="27.8" cy="72.2" r="1.91" fill="var(--bx-ground)"/><circle cx="35.2" cy="72.2" r="3.69" fill="var(--bx-ground)"/><circle cx="42.6" cy="72.2" r="2.4" fill="var(--bx-ground)"/><circle cx="50" cy="72.2" r="1.67" fill="var(--bx-ground)"/><circle cx="57.4" cy="72.2" r="2.4" fill="var(--bx-ground)"/><circle cx="64.8" cy="72.2" r="3.69" fill="var(--bx-ground)"/><circle cx="72.2" cy="72.2" r="1.9" fill="var(--bx-ground)"/><circle cx="35.2" cy="79.6" r="0.91" fill="var(--bx-ground)"/><circle cx="42.6" cy="79.6" r="2.45" fill="var(--bx-ground)"/><circle cx="50" cy="79.6" r="2.95" fill="var(--bx-ground)"/><circle cx="57.4" cy="79.6" r="2.45" fill="var(--bx-ground)"/><circle cx="64.8" cy="79.6" r="0.91" fill="var(--bx-ground)"/></svg></span>
+          <div class="bx-brand-t">
+            <h1 class="bx-brand-name">{{TITLE}}</h1>
+            <p class="bx-brand-sub">{{OWNER}} and Claude · figures as of <span class="bx-num" data-draw="date" data-source="summary" data-field="to" data-where="period=all&amp;metric=sessions">—</span></p>
+          </div>
+        </div>
+        <div class="bx-seg" role="group" aria-label="Reporting period">
+          <button type="button" data-period="7d" aria-pressed="false">7D</button>
+          <button type="button" data-period="30d" aria-pressed="true">30D</button>
+          <button type="button" data-period="90d" aria-pressed="false">90D</button>
+          <button type="button" data-period="all" aria-pressed="false">All</button>
+        </div>
+        <div class="bx-seg is-icons" role="group" aria-label="Color theme">
+          <button type="button" data-theme-choice="light" aria-pressed="false" aria-label="Light theme" title="Light"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg></button>
+          <button type="button" data-theme-choice="auto" aria-pressed="true" aria-label="Match the app's theme" title="Auto"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="13" rx="2"/><path d="M8 21h8M12 17v4"/></svg></button>
+          <button type="button" data-theme-choice="dark" aria-pressed="false" aria-label="Dark theme" title="Dark"><svg viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></svg></button>
+        </div>
+      </div>
+      <nav class="bx-tabs" role="tablist" aria-label="Sections">
+        <button type="button" class="bx-tab" role="tab" data-view="overview" aria-selected="true" aria-controls="view-overview"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>Overview</button>
+        <button type="button" class="bx-tab" role="tab" data-view="activity" aria-selected="false" aria-controls="view-activity"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/></svg>Activity</button>
+        <button type="button" class="bx-tab" role="tab" data-view="models" aria-selected="false" aria-controls="view-models"><svg viewBox="0 0 24 24"><path d="M12 3 3 8l9 5 9-5-9-5zM3 13l9 5 9-5"/></svg>Models</button>
+        <button type="button" class="bx-tab" role="tab" data-view="work" aria-selected="false" aria-controls="view-work"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>Ways of working</button>
+        <button type="button" class="bx-tab" role="tab" data-view="delegation" aria-selected="false" aria-controls="view-delegation"><svg viewBox="0 0 24 24"><circle cx="12" cy="5" r="2.5"/><circle cx="5" cy="19" r="2.5"/><circle cx="19" cy="19" r="2.5"/><path d="M12 7.5v4M12 11.5 6 17M12 11.5l6 5.5"/></svg>Delegation</button>
+        <button type="button" class="bx-tab" role="tab" data-view="value" aria-selected="false" aria-controls="view-value"><svg viewBox="0 0 24 24"><path d="M4 19h16M7 15v-4M12 15V7M17 15v-6"/></svg>Value</button>
+        <button type="button" class="bx-tab" role="tab" data-view="projects" aria-selected="false" aria-controls="view-projects"><svg viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>Projects</button>
+        <button type="button" class="bx-tab" role="tab" data-view="method" aria-selected="false" aria-controls="view-method"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.5"/></svg>Method</button>
+      </nav>
+    </div>
+  </header>
+
+  <p class="bx-sr" aria-live="polite" data-draw="announce" data-source="summary"></p>
+  <main class="bx-main">
+    <!-- OVERVIEW -->
+    <section class="bx-view" id="view-overview" role="tabpanel" aria-label="Overview">
+      <div class="bx-vhead">
+        <div>
+          <p class="bx-eyebrow" style="margin-bottom: 10px;">At a glance · <span data-draw="period-date" data-source="summary" data-field="from">—</span> to <span data-draw="period-date" data-source="summary" data-field="to">—</span><span class="bx-when-compare">, compared with the same number of days before</span></p>
+          <h2 class="bx-take bx-when-compare" tabindex="-1" data-focus>Compared with the previous period, active hours <span data-draw="chg" data-source="summary" data-field="delta" data-metric="active_hours">—</span> and output <span data-draw="chg" data-source="summary" data-field="delta" data-metric="output">—</span>: <b data-draw="val" data-source="summary" data-field="value" data-metric="sessions">—</b> sessions over <b data-draw="val" data-source="summary" data-field="value" data-metric="active_hours">—</b> hours, with <b data-draw="txt" data-source="summary" data-field="text" data-metric="top_model">—</b> writing <b data-draw="pct" data-source="summary" data-field="value" data-metric="top_model">—</b> of it.</h2>
+          <h2 class="bx-take bx-when-all" tabindex="-1" data-focus hidden><b data-draw="val" data-source="summary" data-field="value" data-metric="sessions">—</b> sessions over <b data-draw="val" data-source="summary" data-field="value" data-metric="active_hours">—</b> active hours on <b data-draw="val" data-source="summary" data-field="value" data-metric="active_days">—</b> days, with <b data-draw="txt" data-source="summary" data-field="text" data-metric="top_model">—</b> writing <b data-draw="pct" data-source="summary" data-field="value" data-metric="top_model">—</b> of the output.</h2>
+        </div>
+      </div>
+
+      <div class="bx-kpis" aria-label="Key figures">
+        <div class="bx-card bx-kpi" data-view="activity" data-measure="active_hours" role="button" tabindex="0" aria-label="Active hours: open details"><span class="bx-kpi-l">Active hours</span><b class="bx-kpi-v" data-draw="val" data-source="summary" data-field="value" data-metric="active_hours">—</b><span class="bx-kpi-d"><span class="bx-delta" data-draw="delta" data-source="summary" data-field="delta" data-metric="active_hours">—</span><span class="bx-when-compare" data-draw="prev" data-source="summary" data-field="prev" data-metric="active_hours">—</span></span><div class="bx-spark" data-draw="spark" data-source="summary" data-metric="active_hours"></div></div>
+        <div class="bx-card bx-kpi" data-view="activity" data-measure="sessions" role="button" tabindex="0" aria-label="Sessions: open details"><span class="bx-kpi-l">Sessions</span><b class="bx-kpi-v" data-draw="val" data-source="summary" data-field="value" data-metric="sessions">—</b><span class="bx-kpi-d"><span class="bx-delta" data-draw="delta" data-source="summary" data-field="delta" data-metric="sessions">—</span><span class="bx-when-compare" data-draw="prev" data-source="summary" data-field="prev" data-metric="sessions">—</span></span><div class="bx-spark" data-draw="spark" data-source="summary" data-metric="sessions"></div></div>
+        <div class="bx-card bx-kpi" data-view="models" role="button" tabindex="0" aria-label="Output tokens: open details"><span class="bx-kpi-l">Output tokens</span><b class="bx-kpi-v" data-draw="val" data-source="summary" data-field="value" data-metric="output">—</b><span class="bx-kpi-d"><span class="bx-delta" data-draw="delta" data-source="summary" data-field="delta" data-metric="output">—</span><span class="bx-when-compare" data-draw="prev" data-source="summary" data-field="prev" data-metric="output">—</span></span><div class="bx-spark" data-draw="spark" data-source="summary" data-metric="output"></div></div>
+        <div class="bx-card bx-kpi" data-view="delegation" role="button" tabindex="0" aria-label="Sub-agent share of output: open details"><span class="bx-kpi-l">Sub-agent share of output</span><b class="bx-kpi-v" data-draw="val" data-source="summary" data-field="value" data-metric="subagent_share">—</b><span class="bx-kpi-d"><span class="bx-delta" data-draw="delta" data-source="summary" data-field="delta" data-metric="subagent_share">—</span><span class="bx-when-compare" data-draw="prev" data-source="summary" data-field="prev" data-metric="subagent_share">—</span></span><div class="bx-spark" data-draw="spark" data-source="summary" data-metric="subagent_share"></div></div>
+        <div class="bx-card bx-kpi" data-view="value" role="button" tabindex="0" aria-label="API-equivalent cost: open details"><span class="bx-kpi-l">API-equivalent cost</span><b class="bx-kpi-v" data-draw="usd" data-source="summary" data-field="value" data-metric="cost_usd">—</b><span class="bx-kpi-d"><span class="bx-delta" data-draw="delta" data-source="summary" data-field="delta" data-metric="cost_usd">—</span><span class="bx-when-compare" data-draw="prev" data-source="summary" data-field="prev" data-metric="cost_usd">—</span></span><div class="bx-spark" data-draw="spark" data-source="summary" data-metric="cost_usd"></div></div>
+        <div class="bx-card bx-kpi" data-view="value" data-target="cache" role="button" tabindex="0" aria-label="Cache hit rate: open details"><span class="bx-kpi-l">Cache hit rate</span><b class="bx-kpi-v" data-draw="val" data-source="summary" data-field="value" data-metric="cache_hit_rate">—</b><span class="bx-kpi-d"><span class="bx-delta" data-draw="delta" data-source="summary" data-field="delta" data-metric="cache_hit_rate" data-polarity="good-up">—</span><span class="bx-when-compare" data-draw="prev" data-source="summary" data-field="prev" data-metric="cache_hit_rate">—</span></span><div class="bx-spark" data-draw="spark" data-source="summary" data-metric="cache_hit_rate"></div></div>
+      </div>
+
+      <details class="bx-disc" id="all-metrics">
+        <summary>All measures, compared with the previous period</summary>
+        <div class="bx-disc-body">
+          <div class="bx-table-wrap" style="max-height: none;">
+            <table class="bx-table" data-source="summary" data-row-key="key">
+              <thead><tr><th data-field="metric">Measure</th><th data-field="value" class="is-num">This period</th><th data-field="prev" class="is-num">Period before</th><th data-field="delta" class="is-num">Change</th><th data-field="spark">Trend</th></tr></thead>
+              <tbody data-draw="metrics-table"></tbody>
+            </table>
+          </div>
+        </div>
+      </details>
+
+      <div class="bx-grid is-stretch">
+        <article class="bx-card bx-s8" id="ov-activity">
+          <div class="bx-chead">
+            <div class="bx-chead-t"><span class="bx-eyebrow">Activity</span><h3 class="bx-ctitle">Worked on <b data-draw="val" data-source="summary" data-field="value" data-metric="active_days" data-unit="days">—</b> in the period; longest run <b data-draw="val" data-source="summary" data-field="value" data-metric="longest_streak" data-unit="days">—</b></h3></div>
+            <button type="button" class="bx-more" data-view="activity" data-measure="output">Open calendar</button>
+          </div>
+          <div class="bx-chart" style="min-height: 170px;" data-draw="mini-atlas" data-source="usage_daily sessions subagents hourly summary"></div>
+          <div class="bx-legend" data-draw="atlas-legend" data-source="usage_daily sessions subagents hourly summary"></div>
+        </article>
+        <article class="bx-card bx-s4" id="ov-insights">
+          <div class="bx-chead"><div class="bx-chead-t"><span class="bx-eyebrow">What changed</span><h3 class="bx-ctitle">Signals in the period, largest change first</h3></div></div>
+          <div class="bx-insights" data-draw="insights" data-source="insights"></div>
+        </article>
+      </div>
+
+      <div class="bx-grid is-stretch is-thirds">
+        <article class="bx-card bx-s4" id="ov-models">
+          <div class="bx-chead">
+            <div class="bx-chead-t"><span class="bx-eyebrow">Model mix</span><h3 class="bx-ctitle"><b data-draw="txt" data-source="summary" data-field="text" data-metric="top_model">—</b> wrote <b data-draw="pct" data-source="summary" data-field="value" data-metric="top_model">—</b> of output</h3></div>
+            <button type="button" class="bx-more" data-view="models">Models</button>
+          </div>
+          <div class="bx-mix" data-draw="mini-mix" data-source="model_table usage_daily sessions subagents hourly summary"></div>
+        </article>
+        <article class="bx-card bx-s4" id="ov-rhythm">
+          <div class="bx-chead">
+            <div class="bx-chead-t"><span class="bx-eyebrow">Rhythm</span><h3 class="bx-ctitle">Busiest on <b data-draw="txt" data-source="summary" data-field="text" data-metric="peak_weekday">—</b>s around <b data-draw="txt" data-source="summary" data-field="text" data-metric="peak_hour">—</b></h3></div>
+            <button type="button" class="bx-more" data-view="work">Patterns</button>
+          </div>
+          <div class="bx-chart" style="min-height: 150px;" data-draw="mini-rhythm" data-source="hourly summary"></div>
+        </article>
+        <article class="bx-card bx-s4" id="ov-delegation">
+          <div class="bx-chead">
+            <div class="bx-chead-t"><span class="bx-eyebrow">Delegation</span><h3 class="bx-ctitle">Share of output written by sub-agents</h3></div>
+            <button type="button" class="bx-more" data-view="delegation">Agents</button>
+          </div>
+          <div class="bx-gauge">
+            <div class="bx-chart" style="min-height: 132px;" data-draw="gauge" data-source="summary" data-metric="subagent_share"></div>
+            <div class="bx-figs">
+              <div class="bx-fig"><span class="bx-fig-l">Agents launched</span><b class="bx-fig-v" data-draw="val" data-source="summary" data-field="value" data-metric="subagents">—</b></div>
+              <div class="bx-fig"><span class="bx-fig-l">Multi-agent workflows</span><b class="bx-fig-v" data-draw="val" data-source="summary" data-field="value" data-metric="workflows">—</b></div>
+            </div>
+          </div>
+        </article>
+      </div>
+
+      <div class="bx-grid is-stretch">
+        <article class="bx-card bx-s7" id="ov-projects">
+          <div class="bx-chead">
+            <div class="bx-chead-t"><span class="bx-eyebrow">Projects</span><h3 class="bx-ctitle">Where the output went</h3></div>
+            <button type="button" class="bx-more" data-view="projects">All projects</button>
+          </div>
+          <div class="bx-bars" data-draw="mini-projects" data-source="projects"></div>
+        </article>
+        <article class="bx-card bx-s5" id="ov-value">
+          <div class="bx-chead">
+            <div class="bx-chead-t"><span class="bx-eyebrow">Efficiency</span><h3 class="bx-ctitle"><b data-draw="pct" data-source="summary" data-field="value" data-metric="cache_hit_rate">—</b> of input served from the prompt cache</h3></div>
+            <button type="button" class="bx-more" data-view="value">Value</button>
+          </div>
+          <div class="bx-stats">
+            <div class="bx-stat"><span class="bx-stat-l">Output per prompt</span><b class="bx-stat-v" data-draw="val" data-source="summary" data-field="value" data-metric="output_per_prompt">—</b></div>
+            <div class="bx-stat"><span class="bx-stat-l">Lines written</span><b class="bx-stat-v" data-draw="val" data-source="summary" data-field="value" data-metric="lines_added">—</b></div>
+            <div class="bx-stat"><span class="bx-stat-l">Tool calls</span><b class="bx-stat-v" data-draw="val" data-source="summary" data-field="value" data-metric="tool_calls">—</b></div>
+          </div>
+          <div class="bx-chart" style="min-height: 96px;" data-draw="mini-value" data-source="usage_daily sessions subagents hourly summary"></div>
+        </article>
+      </div>
+    </section>
+
+    <!-- ACTIVITY -->
+    <section class="bx-view" id="view-activity" role="tabpanel" aria-label="Activity" hidden>
+      <div class="bx-vhead">
+        <div>
+          <button type="button" class="bx-back" data-view="overview">‹ Overview</button><h2 class="bx-vtitle" tabindex="-1" data-focus>Activity</h2>
+          <p class="bx-vsub">Every day since the first session. Bars above the grid total each week; bars at the right total each weekday in the reporting period. Click a day to inspect it.</p>
+        </div>
+        <div class="bx-tools">
+          <label class="bx-field" for="bx-measure">Measure
+            <select class="bx-select" id="bx-measure">
+              <option value="output">Output tokens</option>
+              <option value="tokens">Total tokens</option>
+              <option value="cost_usd">API-equivalent cost</option>
+              <option value="active_hours">Active hours</option>
+              <option value="sessions">Sessions</option>
+              <option value="prompts">Your prompts</option>
+              <option value="subagents">Sub-agents launched</option>
+            </select>
+          </label>
+          <div class="bx-seg" role="group" aria-label="Color days by">
+            <button type="button" data-color="volume" aria-pressed="true">Volume</button>
+            <button type="button" data-color="model" aria-pressed="false">Leading model</button>
+          </div>
+        </div>
+      </div>
+      <div class="bx-grid">
+        <div class="bx-s8 bx-block" style="gap: 20px;">
+          <article class="bx-card" id="atlas">
+            <div class="bx-chart" style="min-height: 150px;" data-draw="atlas" data-source="usage_daily sessions subagents hourly summary"></div>
+            <div class="bx-legend" data-draw="atlas-legend" data-source="usage_daily sessions subagents hourly summary"></div>
+          </article>
+        </div>
+        <aside class="bx-card bx-s4 bx-insp" id="day" aria-label="Day inspector">
+          <div class="bx-chead">
+            <div class="bx-chead-t"><span class="bx-eyebrow">Day inspector</span><h3 class="bx-insp-title" data-draw="day-title" data-source="daily">—</h3></div>
+            <div class="bx-step"><button type="button" data-step="-1" aria-label="Previous active day">‹</button><button type="button" data-step="1" aria-label="Next active day">›</button></div>
+          </div>
+          <p class="bx-insp-sub" data-draw="day-sub" data-source="daily">—</p>
+          <div class="bx-stats">
+            <div class="bx-stat"><span class="bx-stat-l">Output tokens</span><b class="bx-stat-v" data-draw="day-stat" data-source="daily" data-field="output">—</b></div>
+            <div class="bx-stat"><span class="bx-stat-l">Thinking</span><b class="bx-stat-v" data-draw="day-stat" data-source="daily" data-field="thinking">—</b></div>
+            <div class="bx-stat"><span class="bx-stat-l">Requests</span><b class="bx-stat-v" data-draw="day-stat" data-source="daily" data-field="requests">—</b></div>
+            <div class="bx-stat"><span class="bx-stat-l">Active hours</span><b class="bx-stat-v" data-draw="day-stat" data-source="daily" data-field="active_hours">—</b></div>
+            <div class="bx-stat"><span class="bx-stat-l">Lines written</span><b class="bx-stat-v" data-draw="day-stat" data-source="daily" data-field="lines_added">—</b></div>
+            <div class="bx-stat"><span class="bx-stat-l">API cost</span><b class="bx-stat-v" data-draw="day-usd" data-source="daily" data-field="cost_usd">—</b></div>
+          </div>
+          <div class="bx-block"><h4 class="bx-h4">Models</h4><div class="bx-bars" data-draw="day-models" data-source="usage_daily sessions subagents hourly summary"></div></div>
+          <div class="bx-block"><h4 class="bx-h4">Requests by hour</h4><div class="bx-chart" style="min-height: 120px;" data-draw="day-hours" data-source="usage_daily sessions subagents hourly summary"></div></div>
+        </aside>
+        <div class="bx-s12 bx-block" style="gap: 16px;">
+          <details class="bx-disc" id="day-sessions" open>
+            <summary><span>Sessions on this day <span class="bx-count" data-draw="day-count" data-source="daily" data-field="sessions">—</span></span></summary>
+            <div class="bx-disc-body">
+              <span data-draw="when-day" data-kind="sessions" data-source="sessions"></span>
+              <div class="bx-table-wrap bx-day-sessions" data-when="some">
+                <table class="bx-table" data-source="sessions" data-row-key="key">
+                  <thead><tr>
+                    <th data-field="title">Session</th>
+                    <th data-field="project" class="is-sec">Project</th>
+                    <th data-field="model_name" class="is-sec">Main model</th>
+                    <th data-field="prompts" class="is-num is-sec">Prompts</th>
+                    <th data-field="active_min" class="is-num is-sec">Active min</th>
+                    <th data-field="output" class="is-num">Output</th>
+                    <th data-field="subagents" class="is-num is-sec">Sub-agents</th>
+                    <th data-field="lines_added" class="is-num is-sec">Lines</th>
+                    <th data-field="cost_usd" class="is-num">Cost $</th>
+                  </tr></thead>
+                  <tbody data-draw="day-sessions"></tbody>
+                </table>
+              </div>
+              <p class="bx-note bx-none-sessions" data-when="none" hidden>No sessions on this day.</p>
+            </div>
+          </details>
+          <details class="bx-disc" id="day-agents">
+            <summary><span>Sub-agents launched on this day <span class="bx-count" data-draw="day-count" data-source="daily" data-field="subagents">—</span></span></summary>
+            <div class="bx-disc-body">
+              <span data-draw="when-day" data-kind="subagents" data-source="subagents"></span>
+              <div class="bx-table-wrap bx-day-agents" data-when="some">
+                <table class="bx-table" data-source="subagents" data-row-key="id">
+                  <thead><tr>
+                    <th data-field="time">Time</th>
+                    <th data-field="type" class="is-sec">Kind</th>
+                    <th data-field="description">Task</th>
+                    <th data-field="model_name" class="is-sec">Model</th>
+                    <th data-field="tool_calls" class="is-num is-sec">Tool calls</th>
+                    <th data-field="output" class="is-num">Output</th>
+                    <th data-field="cost_usd" class="is-num is-sec">Cost $</th>
+                  </tr></thead>
+                  <tbody data-draw="day-agents"></tbody>
+                </table>
+              </div>
+              <p class="bx-note bx-none-agents" data-when="none" hidden>No sub-agents were launched on this day.</p>
+            </div>
+          </details>
+        </div>
+      </div>
+    </section>
+
+    <!-- MODELS -->
+    <section class="bx-view" id="view-models" role="tabpanel" aria-label="Models" hidden>
+      <div class="bx-vhead">
+        <div>
+          <button type="button" class="bx-back" data-view="overview">‹ Overview</button><h2 class="bx-vtitle" tabindex="-1" data-focus>Model portfolio</h2>
+          <p class="bx-vsub">Which Claude models did the writing, how the mix moved as new models arrived, and what each would cost at API prices.</p>
+        </div>
+        <div class="bx-seg" role="group" aria-label="Show output as">
+          <button type="button" data-mix="volume" aria-pressed="true">Volume</button>
+          <button type="button" data-mix="share" aria-pressed="false">Share</button>
+        </div>
+      </div>
+      <div class="bx-grid is-stretch">
+        <article class="bx-card bx-s12" id="model-shift">
+          <div class="bx-chead"><div class="bx-chead-t"><span class="bx-eyebrow">Output by model</span><h3 class="bx-ctitle"><b data-draw="txt" data-source="summary" data-field="text" data-metric="top_model">—</b> wrote <b data-draw="pct" data-source="summary" data-field="value" data-metric="top_model">—</b> of the output in the period</h3><p class="bx-csub">Per week for 90 days and all time, per day otherwise.</p></div></div>
+          <div class="bx-chart" style="min-height: 280px;" data-draw="model-shift" data-source="usage_daily sessions subagents hourly summary"></div>
+        </article>
+        <article class="bx-card bx-s5" id="model-life">
+          <div class="bx-chead"><div class="bx-chead-t"><span class="bx-eyebrow">Adoption</span><h3 class="bx-ctitle">When each model was in use</h3><p class="bx-csub">From first to last day used, across all time. Dot size shows the busiest week.</p></div></div>
+          <div class="bx-chart" style="min-height: 240px;" data-draw="model-life" data-source="usage_daily sessions subagents hourly summary"></div>
+        </article>
+        <article class="bx-card bx-s7" id="model-table">
+          <div class="bx-chead"><div class="bx-chead-t"><span class="bx-eyebrow">Ranking</span><h3 class="bx-ctitle">Every model used in the period</h3><p class="bx-csub">API-equivalent cost uses each model's rate observed in Claude Code's own cost records, or its family's where none exist.</p></div></div>
+          <div class="bx-table-wrap" style="max-height: none;">
+            <table class="bx-table" data-source="model_table" data-row-key="key">
+              <thead><tr>
+                <th data-field="model_name">Model</th>
+                <th data-field="share">Share of output</th>
+                <th data-field="output" class="is-num is-sec">Output</th>
+                <th data-field="requests" class="is-num is-sec">Requests</th>
+                <th data-field="cost_usd" class="is-num">Cost $</th>
+                <th data-field="last_used" class="is-sec">Last used</th>
+              </tr></thead>
+              <tbody data-draw="model-table"></tbody>
+            </table>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <!-- WAYS OF WORKING -->
+    <section class="bx-view" id="view-work" role="tabpanel" aria-label="Ways of working" hidden>
+      <div class="bx-vhead"><div><button type="button" class="bx-back" data-view="overview">‹ Overview</button><h2 class="bx-vtitle" tabindex="-1" data-focus>Ways of working</h2><p class="bx-vsub">When we work, what Claude spends its actions on, and the shape of each session.</p></div></div>
+      <div class="bx-grid">
+        <article class="bx-card bx-s7" id="rhythm">
+          <div class="bx-chead"><div class="bx-chead-t"><span class="bx-eyebrow">Weekly rhythm</span><h3 class="bx-ctitle">Work peaks on <b data-draw="txt" data-source="summary" data-field="text" data-metric="peak_weekday">—</b>s around <b data-draw="txt" data-source="summary" data-field="text" data-metric="peak_hour">—</b></h3><p class="bx-csub">Model requests by weekday and local hour, sub-agents included.</p></div></div>
+          <div class="bx-chart" style="min-height: 250px;" data-draw="rhythm" data-source="hourly summary"></div>
+        </article>
+        <article class="bx-card bx-s5" id="mix">
+          <div class="bx-chead"><div class="bx-chead-t"><span class="bx-eyebrow">Work mix</span><h3 class="bx-ctitle"><b data-draw="mix-top" data-source="tool_mix" data-field="category">—</b> takes <b data-draw="mix-top-share" data-source="tool_mix" data-field="share">—</b> of Claude's actions</h3><p class="bx-csub">Tool calls by kind of work, with the most used tools in each.</p></div></div>
+          <div class="bx-bars" data-draw="tool-mix" data-source="tool_mix"></div>
+        </article>
+        <article class="bx-card bx-s12" id="landscape">
+          <div class="bx-chead"><div class="bx-chead-t"><span class="bx-eyebrow">Session landscape</span><h3 class="bx-ctitle">Each session by time spent and output produced</h3><p class="bx-csub">Both axes logarithmic. Circle area shows sub-agents launched; color shows the main model. Click a session to inspect its day.</p></div></div>
+          <div class="bx-chart" style="min-height: 340px;" data-draw="landscape" data-source="usage_daily sessions subagents hourly summary"></div>
+        </article>
+      </div>
+    </section>
+
+    <!-- DELEGATION -->
+    <section class="bx-view" id="view-delegation" role="tabpanel" aria-label="Delegation" hidden>
+      <div class="bx-vhead"><div><button type="button" class="bx-back" data-view="overview">‹ Overview</button><h2 class="bx-vtitle" tabindex="-1" data-focus>Delegation</h2><p class="bx-vsub">How much of the work ran in sub-agents and multi-agent workflows rather than in the main conversation.</p></div></div>
+      <div class="bx-grid">
+        <article class="bx-card bx-s7" id="agents-time">
+          <div class="bx-chead"><div class="bx-chead-t"><span class="bx-eyebrow">Agents over time</span><h3 class="bx-ctitle">Sub-agents produced <b data-draw="pct" data-source="summary" data-field="value" data-metric="subagent_share">—</b> of output<span class="bx-when-compare">, against <b data-draw="pct-prev" data-source="summary" data-field="prev" data-metric="subagent_share">—</b> in the period before</span></h3></div></div>
+          <div class="bx-chart" style="min-height: 290px;" data-draw="agents-time" data-source="usage_daily sessions subagents hourly summary"></div>
+        </article>
+        <article class="bx-card bx-s5" id="workflows">
+          <div class="bx-chead"><div class="bx-chead-t"><span class="bx-eyebrow">Largest workflows</span><h3 class="bx-ctitle"><b data-draw="val" data-source="summary" data-field="value" data-metric="workflows">—</b> multi-agent workflows in the period</h3><p class="bx-csub">Ranked by agents launched. Click a row to inspect its day.</p></div></div>
+          <span data-draw="when-workflows" data-source="workflows"></span>
+          <div class="bx-table-wrap bx-workflows-wrap" data-when="some" style="max-height: 22rem;">
+            <table class="bx-table" data-source="workflows" data-row-key="workflow">
+              <thead><tr>
+                <th data-field="date">Date</th>
+                <th data-field="title">Session</th>
+                <th data-field="agents" class="is-num">Agents</th>
+                <th data-field="cost_usd" class="is-num is-sec">Cost $</th>
+              </tr></thead>
+              <tbody data-draw="workflows"></tbody>
+            </table>
+          </div>
+          <p class="bx-note bx-none-workflows" data-when="none" hidden>No multi-agent workflows ran in this period.</p>
+        </article>
+      </div>
+    </section>
+
+    <!-- VALUE -->
+    <section class="bx-view" id="view-value" role="tabpanel" aria-label="Value" hidden>
+      <div class="bx-vhead"><div><button type="button" class="bx-back" data-view="overview">‹ Overview</button><h2 class="bx-vtitle" tabindex="-1" data-focus>Efficiency and value</h2><p class="bx-vsub">What the same work would cost on the pay-as-you-go API, and how prompt caching shapes the token bill.</p></div></div>
+      <div class="bx-grid">
+        <article class="bx-card bx-s7" id="value-time">
+          <div class="bx-chead"><div class="bx-chead-t"><span class="bx-eyebrow">API-equivalent cost</span><h3 class="bx-ctitle">About <b data-draw="usd" data-source="summary" data-field="value" data-metric="cost_usd">—</b> in the period, <b data-draw="per-hour" data-source="summary" data-field="value" data-metric="cost_usd">—</b> per active hour<span class="bx-when-compare">, <b data-draw="delta-word" data-source="summary" data-field="delta" data-metric="cost_usd">—</b></span></h3><p class="bx-csub">Estimated at API list prices by model, with the running total.</p></div></div>
+          <div class="bx-chart" style="min-height: 290px;" data-draw="value-time" data-source="usage_daily sessions subagents hourly summary"></div>
+        </article>
+        <article class="bx-card bx-s5" id="cache">
+          <div class="bx-chead"><div class="bx-chead-t"><span class="bx-eyebrow">Token economics</span><h3 class="bx-ctitle"><b data-draw="pct" data-source="summary" data-field="value" data-metric="cache_hit_rate">—</b> of input tokens came from the prompt cache</h3><p class="bx-csub">All tokens in the period by kind. Cache reads are earlier context sent again at a tenth of the input price.</p></div></div>
+          <div class="bx-mix" data-draw="token-mix" data-source="usage_daily sessions subagents hourly summary"></div>
+          <div class="bx-chart" style="min-height: 140px;" data-draw="cache-trend" data-source="usage_daily sessions subagents hourly summary"></div>
+        </article>
+      </div>
+    </section>
+
+    <!-- PROJECTS -->
+    <section class="bx-view" id="view-projects" role="tabpanel" aria-label="Projects" hidden>
+      <div class="bx-vhead"><div><button type="button" class="bx-back" data-view="overview">‹ Overview</button><h2 class="bx-vtitle" tabindex="-1" data-focus>Project portfolio</h2><p class="bx-vsub">The folders our sessions ran in, when each was active, and what it drew on.</p></div></div>
+      <div class="bx-grid">
+        <article class="bx-card bx-s12" id="project-timeline">
+          <div class="bx-chead"><div class="bx-chead-t"><span class="bx-eyebrow">Timeline</span><h3 class="bx-ctitle"><b data-draw="proj-top" data-source="projects" data-field="project">—</b> drew the most output, <b data-draw="proj-top-share" data-source="projects" data-field="share">—</b> of the total</h3><p class="bx-csub">One row per project; each dot is an active day sized by output. Click a dot to inspect that day.</p></div></div>
+          <div class="bx-chart" style="min-height: 300px;" data-draw="project-timeline" data-source="projects sessions summary"></div>
+        </article>
+        <article class="bx-card bx-s12" id="project-table">
+          <div class="bx-chead"><div class="bx-chead-t"><span class="bx-eyebrow">Ranking</span><h3 class="bx-ctitle">Every project in the period</h3></div></div>
+          <div class="bx-table-wrap" style="max-height: 26rem;">
+            <table class="bx-table" data-source="projects" data-row-key="key">
+              <thead><tr>
+                <th data-field="project">Project</th>
+                <th data-field="share">Share of output</th>
+                <th data-field="sessions" class="is-num is-sec">Sessions</th>
+                <th data-field="days" class="is-num is-sec">Days</th>
+                <th data-field="active_hours" class="is-num is-sec">Active h</th>
+                <th data-field="subagents" class="is-num is-sec">Sub-agents</th>
+                <th data-field="output" class="is-num">Output</th>
+                <th data-field="cost_usd" class="is-num is-sec">Cost $</th>
+              </tr></thead>
+              <tbody data-draw="project-table"></tbody>
+            </table>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <!-- METHOD -->
+    <section class="bx-view" id="view-method" role="tabpanel" aria-label="Method" hidden>
+      <div class="bx-vhead"><div><button type="button" class="bx-back" data-view="overview">‹ Overview</button><h2 class="bx-vtitle" tabindex="-1" data-focus>Method and definitions</h2><p class="bx-vsub">Where every figure comes from and what it means.</p></div></div>
+      <article class="bx-card">
+        <div class="bx-method">
+          <p><b>Sources.</b> A local collector reads the transcripts Claude Code (desktop and terminal) and Cowork keep on this computer, each time the dashboard is refreshed (nightly when scheduled). Claude deletes transcripts after 30 days by default, so the collector keeps a permanent ledger; days whose transcript was gone before the ledger began show sessions and prompts only, drawn hatched on the calendar. Chats on claude.ai are not included.</p>
+          <p><b>Tokens.</b> Output tokens include thinking. Input is split into fresh input, cache writes and cache reads; total tokens add all four. A model request is one call to the model, so a single prompt can trigger dozens.</p>
+          <p><b>Active hours.</b> The time between consecutive messages in a session, counting gaps of up to 15 minutes. Longer pauses count as a break. Sub-agents run in parallel and are not added on top.</p>
+          <p><b>API-equivalent cost.</b> What the same tokens would cost at pay-as-you-go API prices, as a yardstick for how much work was done, not money spent. Each model's price is calibrated from the cost records Claude Code writes into its transcripts; models without such records take their family's rate. It is an estimate, not a bill: a subscription covers this use.</p>
+          <p><b>Sub-agents.</b> Agents launched from a session, directly or as steps of a multi-agent workflow. Workflow steps that never called the model are left out. Their output counts toward their parent session.</p>
+          <p><b>Sessions.</b> A session that runs past midnight counts on each day it touches, so day tiles can add up to more than the period's total, which counts every session once.</p>
+          <p><b>Comparisons.</b> Every change compares the reporting period with the same number of days immediately before it. Weekly series start on Mondays; days follow local time. Lines written count lines in files Claude created or in the replacement text of its edits.</p>
+        </div>
+      </article>
+    </section>
+  </main>
+</div>
+<script src="core.js"></script>
+<script src="views.js"></script>

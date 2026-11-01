@@ -1,0 +1,21 @@
+{
+  "name": "usage-dashboard",
+  "version": "1.0.0",
+  "displayName": "Claude usage dashboard",
+  "description": "A private claude.ai dashboard of how you work with Claude, built from your local Claude Code and Cowork transcripts: activity calendar, models, tokens, sessions, sub-agents, tools, projects and API-equivalent cost, refreshed nightly.",
+  "author": {
+    "name": "Leo Warnow",
+    "url": "https://github.com/LeoWarnow"
+  },
+  "homepage": "https://github.com/LeoWarnow/claude-usage-dashboard",
+  "repository": "https://github.com/LeoWarnow/claude-usage-dashboard",
+  "license": "MIT",
+  "keywords": [
+    "usage",
+    "dashboard",
+    "artifact",
+    "analytics",
+    "tokens"
+  ],
+  "icon": ".claude-plugin/icon.png"
+}

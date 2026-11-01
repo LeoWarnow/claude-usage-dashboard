@@ -1,0 +1,10 @@
+{
+  "color": "volume",
+  "day": null,
+  "measure": "output",
+  "mix": "volume",
+  "mode": "auto",
+  "period": "30d",
+  "project": null,
+  "view": "overview"
+}

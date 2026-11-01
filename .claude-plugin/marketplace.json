@@ -1,0 +1,12 @@
+{
+  "name": "warnow-tools",
+  "owner": { "name": "Leo Warnow", "url": "https://github.com/LeoWarnow" },
+  "description": "Leo Warnow's tools for Claude Code.",
+  "plugins": [
+    {
+      "name": "usage-dashboard",
+      "source": "./",
+      "description": "A private claude.ai dashboard of how you work with Claude, built from your local transcripts."
+    }
+  ]
+}

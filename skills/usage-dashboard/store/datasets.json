@@ -1,0 +1,32 @@
+{
+  "usage_daily": {
+    "title": "Tokens and value by day",
+    "description": "Requests, tokens (fresh input, output, thinking, cache read and write), web searches and estimated API-equivalent value per day, model and role (main session or sub-agent). From local Claude Code and Cowork transcripts via the usage-dashboard collector.",
+    "staleAfterHours": 48
+  },
+  "sessions": {
+    "title": "Sessions by day",
+    "description": "One row per session per active day: title, project folder, main model, prompts, active minutes, tokens, sub-agents, tool calls, lines written and API-equivalent value. Sessions whose transcript was gone before the ledger began carry tokens_known false.",
+    "staleAfterHours": 48
+  },
+  "hourly": {
+    "title": "Requests by hour",
+    "description": "Model requests per day and local hour, main sessions and sub-agents together.",
+    "staleAfterHours": 48
+  },
+  "subagents": {
+    "title": "Sub-agents launched",
+    "description": "One row per sub-agent or workflow agent that called the model: start time, parent session, kind, workflow, task, main model, requests, tokens, tool calls and API-equivalent value.",
+    "staleAfterHours": 48
+  },
+  "tools": {
+    "title": "Tool calls by day",
+    "description": "Tool calls per day, tool and role, with the kind of work each tool belongs to (commands, reading, editing, delegation, web research, literature, publishing, planning).",
+    "staleAfterHours": 48
+  },
+  "summary": {
+    "title": "Board figures by period",
+    "description": "Headline figures for the last 7, 30 and 90 days and all time, each with the same-length period before it and weekly or daily trends for both periods, computed by the collector on the day it runs.",
+    "staleAfterHours": 48
+  }
+}

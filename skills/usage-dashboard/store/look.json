@@ -1,0 +1,57 @@
+{
+  "corners": "6px",
+  "dark": {
+    "bad": "#EE7A6C",
+    "border": "#29324A",
+    "card": "#141B28",
+    "charts": [
+      "#86AEE8",
+      "#3FC1BE",
+      "#E6B04B",
+      "#EB8A71",
+      "#AA9AD9",
+      "#8DBCE3",
+      "#AEC25F",
+      "#A3ADBE"
+    ],
+    "good": "#5CC495",
+    "ground": "#0C121D",
+    "muted": "#9AA4B4",
+    "text": "#E9EDF3",
+    "warning": "#E3A34A"
+  },
+  "fonts": {
+    "display": "'Iowan Old Style', Charter, 'Palatino Linotype', Georgia, serif",
+    "text": "'Avenir Next', 'Helvetica Neue', 'Segoe UI', system-ui, sans-serif"
+  },
+  "light": {
+    "bad": "#B5392E",
+    "border": "#D9DEE5",
+    "card": "#FFFFFF",
+    "charts": [
+      "#1B3A6B",
+      "#0E7C7B",
+      "#C08A1E",
+      "#C2553D",
+      "#6B5B95",
+      "#4F86B8",
+      "#7A8B3A",
+      "#8A94A6"
+    ],
+    "good": "#1F7A55",
+    "ground": "#F3F4F6",
+    "muted": "#5A6475",
+    "text": "#0F1B2D",
+    "warning": "#A8650B"
+  },
+  "sizes": {
+    "body": "14px",
+    "caption": "12px",
+    "heading": "17px",
+    "title": "34px"
+  },
+  "system": {
+    "name": "Claude Usage Dashboard house style",
+    "url": ""
+  }
+}
